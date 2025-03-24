@@ -1,3 +1,4 @@
+-- Task 1
 CREATE DATABASE SIS;
 USE SIS;
 
@@ -45,16 +46,16 @@ CREATE TABLE Payments (
 
 
 INSERT INTO Students (first_name, last_name, date_of_birth, email, phone_number) VALUES
-('Keerthivardhan', 'Gembali', '2000-01-01', 'keerthivardhan.gembali@gmail.com', '9876543210'),
-('Ram', 'Kumar', '2001-02-02', 'ram.kumar@gmail.com', '9876543211'),
-('Ananya', 'Sharma', '2002-03-03', 'ananya.sharma@gmail.com', '9876543212'),
-('Amit', 'Verma', '2003-04-04', 'amit.verma@gmail.com', '9876543213'),
-('Sneha', 'Iyer', '2004-05-05', 'sneha.iyer@gmail.com', '9876543214'),
-('Rohit', 'Patil', '2005-06-06', 'rohit.patil@gmail.com', '9876543215'),
-('Priya', 'Joshi', '2006-07-07', 'priya.joshi@gmail.com', '9876543216'),
-('Vikram', 'Singh', '2007-08-08', 'vikram.singh@gmail.com', '9876543217'),
-('Neha', 'Gupta', '2008-09-09', 'neha.gupta@gmail.com', '9876543218'),
-('Arjun', 'Mehta', '2009-10-10', 'arjun.mehta@gmail.com', '9876543219');
+('Keerthivardhan', 'Gembali', '2002-05-14', 'keerthivardhan374@gmail.com', '7207820958'),
+('Ram', 'Kumar', '2002-04-12', 'ram3754@gmail.com', '9347294947'),
+('Ananya', 'Sharma', '2014-03-18', 'ananya8294@gmail.com', '9883234211'),
+('Amit', 'Verma', '2005-11-19', 'amit27728@gmail.com', '9789145621'),
+('Sneha', 'Iyer', '2004-02-15', 'sneha288123@gmail.com', '9876543214'),
+('Rohit', 'Patil', '2002-06-22', 'rohit6892@gmail.com', '9871278912'),
+('Priya', 'Joshi', '2001-07-17', 'priya791@gmail.com', '9789167234'),
+('Vikram', 'Singh', '2007-12-08', 'vikram.2939@gmail.com', '9098914523'),
+('Neha', 'Gupta', '2008-03-09', 'neha2442@gmail.com', '9789126723'),
+('Arjun', 'Mehta', '2009-09-10', 'arjun2342@gmail.com', '9876543219');
 
 
 INSERT INTO Teacher (first_name, last_name, email) VALUES
@@ -114,5 +115,114 @@ SELECT s.student_id, s.first_name, s.last_name
 FROM Students s
 LEFT JOIN Enrollments e ON s.student_id = e.student_id
 WHERE e.student_id IS NULL;
+
+SELECT s.first_name, s.last_name, c.course_name
+FROM Students s
+JOIN Enrollments e ON s.student_id = e.student_id
+JOIN Courses c ON e.course_id = c.course_id;
+
+SELECT t.first_name, t.last_name, c.course_name
+FROM Teacher t
+JOIN Courses c ON t.teacher_id = c.teacher_id;
+
+SELECT s.first_name, s.last_name, e.enrollment_date
+FROM Students s
+JOIN Enrollments e ON s.student_id = e.student_id
+JOIN Courses c ON e.course_id = c.course_id
+WHERE c.course_name = 'Mathematics';
+
+SELECT s.first_name, s.last_name
+FROM Students s
+LEFT JOIN Payments p ON s.student_id = p.student_id
+WHERE p.student_id IS NULL;
+
+SELECT c.course_name
+FROM Courses c
+LEFT JOIN Enrollments e ON c.course_id = e.course_id
+WHERE e.course_id IS NULL;
+
+SELECT DISTINCT s.student_id, s.first_name, s.last_name
+FROM Enrollments e1
+JOIN Enrollments e2 ON e1.student_id = e2.student_id AND e1.course_id <> e2.course_id
+JOIN Students s ON e1.student_id = s.student_id;
+
+SELECT t.teacher_id, t.first_name, t.last_name
+FROM Teacher t
+LEFT JOIN Courses c ON t.teacher_id = c.teacher_id
+WHERE c.course_id IS NULL;
+
+-- Task 4
+SELECT AVG(student_count) AS average_enrollment
+FROM (
+    SELECT course_id, COUNT(student_id) AS student_count
+    FROM Enrollments
+    GROUP BY course_id
+) AS course_enrollments;
+
+SELECT s.student_id, s.first_name, s.last_name, p.amount
+FROM Payments p
+JOIN Students s ON p.student_id = s.student_id
+WHERE p.amount = (SELECT MAX(amount) FROM Payments);
+
+SELECT c.course_id, c.course_name, COUNT(e.student_id) AS enrollment_count
+FROM Enrollments e
+JOIN Courses c ON e.course_id = c.course_id
+GROUP BY c.course_id, c.course_name
+HAVING COUNT(e.student_id) = (
+    SELECT MAX(enrollment_count) FROM (
+        SELECT COUNT(student_id) AS enrollment_count FROM Enrollments GROUP BY course_id
+    ) AS max_enrollments
+);
+
+SELECT t.teacher_id, t.first_name, t.last_name, COALESCE(SUM(p.amount), 0) AS total_payments
+FROM Teacher t
+LEFT JOIN Courses c ON t.teacher_id = c.teacher_id
+LEFT JOIN Enrollments e ON c.course_id = e.course_id
+LEFT JOIN Payments p ON e.student_id = p.student_id
+GROUP BY t.teacher_id, t.first_name, t.last_name;
+
+SELECT s.student_id, s.first_name, s.last_name
+FROM Students s
+WHERE (
+    SELECT COUNT(DISTINCT e.course_id)
+    FROM Enrollments e
+    WHERE e.student_id = s.student_id
+) = (SELECT COUNT(*) FROM Courses);
+
+SELECT t.teacher_id, t.first_name, t.last_name
+FROM Teacher t
+WHERE t.teacher_id NOT IN (SELECT DISTINCT teacher_id FROM Courses WHERE teacher_id IS NOT NULL);
+
+SELECT AVG(TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE())) AS average_age FROM Students;
+
+SELECT c.course_id, c.course_name
+FROM Courses c
+WHERE NOT EXISTS (SELECT 1 FROM Enrollments e WHERE e.course_id = c.course_id);
+
+SELECT e.student_id, e.course_id, SUM(p.amount) AS total_payment
+FROM Enrollments e
+JOIN Payments p ON e.student_id = p.student_id
+GROUP BY e.student_id, e.course_id;
+
+SELECT s.student_id, s.first_name, s.last_name
+FROM Students s
+JOIN Payments p ON s.student_id = p.student_id
+GROUP BY s.student_id, s.first_name, s.last_name
+HAVING COUNT(p.payment_id) > 1;
+
+SELECT s.student_id, s.first_name, s.last_name, SUM(p.amount) AS total_payment
+FROM Students s
+JOIN Payments p ON s.student_id = p.student_id
+GROUP BY s.student_id, s.first_name, s.last_name;
+
+SELECT c.course_id, c.course_name, COUNT(e.student_id) AS student_count
+FROM Courses c
+LEFT JOIN Enrollments e ON c.course_id = e.course_id
+GROUP BY c.course_id, c.course_name;
+
+SELECT s.student_id, s.first_name, s.last_name, AVG(p.amount) AS average_payment
+FROM Students s
+JOIN Payments p ON s.student_id = p.student_id
+GROUP BY s.student_id, s.first_name, s.last_name;
 
 
