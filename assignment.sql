@@ -99,6 +99,32 @@ INSERT INTO Payments (student_id, amount, payment_date) VALUES
 (9, 800.00, '2025-02-09'),
 (10, 850.00, '2025-02-10');
 
+--Task 2
+INSERT INTO Students (first_name, last_name, date_of_birth, email, phone_number)
+VALUES ('John', 'Doe', '1995-08-15', 'john.doe@gmail.com', '9876543220');
+
+INSERT INTO Enrollments (student_id, course_id, enrollment_date)
+VALUES (1, 2, CURDATE());
+
+UPDATE Teacher
+SET email = 'updated.rajesh.sharma@gmail.com'
+WHERE teacher_id = 1;
+
+DELETE FROM Enrollments
+WHERE student_id = 1 AND course_id = 2;
+
+UPDATE Courses
+SET teacher_id = 2
+WHERE course_id = 3;
+
+DELETE FROM Students
+WHERE student_id = 1;
+
+UPDATE Payments
+SET amount = 999.99
+WHERE payment_id = 1;
+
+-- Task 3
 
 SELECT s.student_id, s.first_name, s.last_name, SUM(p.amount) AS total_payment
 FROM Students s
@@ -152,6 +178,7 @@ LEFT JOIN Courses c ON t.teacher_id = c.teacher_id
 WHERE c.course_id IS NULL;
 
 -- Task 4
+
 SELECT AVG(student_count) AS average_enrollment
 FROM (
     SELECT course_id, COUNT(student_id) AS student_count
